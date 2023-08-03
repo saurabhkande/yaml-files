@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: simple-web-ui
+  name: simple-web-ui
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: simple-web-ui
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: simple-web-ui
+    spec:
+      containers:
+        - env:
+            - name: NGINX_HOST
+              value: localhost
+            - name: NGINX_PORT
+              value: "80"
+            - name: NGINX_BACKEND_1_HOST
+              value: simple-app-server:80
+            - name: NGINX_BACKEND_1_PORT
+              value: "80"
+          image: ganeshkaila/simple-web-ui:amd64
+          imagePullPolicy: Always
+          name: simple-web-ui
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
